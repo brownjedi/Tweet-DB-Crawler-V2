@@ -1,0 +1,76 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE mapper PUBLIC '-//mybatis.org//DTD Mapper 3.0//EN'
+  'http://mybatis.org/dtd/mybatis-3-mapper.dtd'>
+
+
+<mapper namespace='edu.columbia.gskr.tweetdbcrawler.mybatis.mapper.TweetMapper'>
+
+    <resultMap id="HashTagResult" type="String">
+        <result column="hashTag" javaType="String"/>
+    </resultMap>
+
+    <resultMap type="Tweet" id="TweetResult">
+
+        <id property="id" column="id"/>
+        <result property="userScreenName" column="userScreenName"/>
+        <result property="userLocation" column="userLocation"/>
+        <result property="profileImageURL" column="profileImageURL"/>
+        <result property="statusText" column="statusText"/>
+        <result property="latitude" column="latitude"/>
+        <result property="longitude" column="longitude"/>
+        <result property="createdDate" column="createdDate"/>
+        <result property="updatedDate" column="updatedDate"/>
+        <collection property="hashTags" resultMap='HashTagResult'/>
+
+    </resultMap>
+
+    <delete id="deleteTweetById" parameterType="long">
+
+        delete from Tweets where id = #{id};
+
+    </delete>
+
+    <delete id="deleteHashTags" parameterType="long">
+
+        delete from HashTags where tweetId = #{tweetId};
+
+    </delete>
+
+
+    <insert id="insertTweet" parameterType="Tweet" keyProperty="id">
+
+        INSERT INTO Tweets (id, userScreenName, userLocation, profileImageURL, statusText, latitude, longitude, createdDate, updatedDate)
+        VALUES (#{id}, #{userScreenName}, #{userLocation}, #{profileImageURL}, #{statusText}, #{latitude}, #{longitude}, #{createdDate}, #{updatedDate})
+
+    </insert>
+
+
+    <insert id="insertHashTags" parameterType="map">
+
+        <if test="hashTags != null and hashTags.size() > 0">
+
+            INSERT INTO HashTags (tweetId, hashTag)
+            VALUES
+            <foreach item="element" index="index" collection="hashTags" separator=",">
+                (#{tweetId}, #{element})
+            </foreach>
+
+        </if>
+
+    </insert>
+
+    <select id="getTweetCount" resultType="int">
+
+        SELECT COUNT(*) as count from Tweets;
+
+    </select>
+
+    <select id="getOldestTweetId" resultType="long">
+
+        select id FROM Tweets
+        ORDER BY updatedDate ASC
+        LIMIT 1
+
+    </select>
+
+</mapper>
